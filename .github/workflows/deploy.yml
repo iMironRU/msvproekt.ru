@@ -60,13 +60,17 @@ jobs:
           FTP_USER: ${{ secrets.FTP_USER }}
           FTP_PASS: ${{ secrets.FTP_PASS }}
         run: |
-          lftp -e "
-            set ftp:ssl-allow no;
-            set net:timeout 60;
-            set net:max-retries 3;
-            mirror --reverse --delete --parallel=4 dist/ /;
-            bye
-          " ftp://$FTP_USER:$FTP_PASS@$FTP_HOST
+          cat > /tmp/deploy.lftp << EOF
+          set ftp:ssl-allow no
+          set ftp:passive-mode on
+          set net:timeout 60
+          set net:max-retries 3
+          open ftp://$FTP_HOST
+          user $FTP_USER $FTP_PASS
+          mirror --reverse --delete --parallel=4 dist/ /
+          bye
+          EOF
+          lftp -f /tmp/deploy.lftp
 
   # ── 3. GitHub Release with ZIP (only on version tags) ────────────────────
   release:
