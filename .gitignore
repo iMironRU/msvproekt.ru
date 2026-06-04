@@ -1,0 +1,9 @@
+dist/
+node_modules/
+public_html/
+.claude/
+.DS_Store
+*.log
+# Root-level PDFs — add documents properly to src/ instead
+/*.pdf
+/*.docx.pdf

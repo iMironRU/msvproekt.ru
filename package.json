@@ -1,0 +1,14 @@
+{
+  "name": "msvproekt-ru",
+  "version": "1.0.0",
+  "description": "Static website for MSV LLC — construction & engineering company",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "preview": "node build.js && npx serve dist"
+  },
+  "devDependencies": {
+    "handlebars": "^4.7.8",
+    "js-yaml": "^4.1.0"
+  }
+}
