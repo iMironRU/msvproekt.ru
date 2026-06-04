@@ -104,7 +104,7 @@ jobs:
         id: deploy
         uses: actions/deploy-pages@v4
 
-  # ── 4. GitHub Release with ZIP (every push to main) ─────────────────────
+  # ── 4. GitHub Release with ZIP ───────────────────────────────────────────
   release:
     name: Create release archive
     needs: build
@@ -121,7 +121,21 @@ jobs:
       - name: Create ZIP
         run: cd dist && zip -r ../public_html.zip .
 
-      - name: Update latest release
+      # Версионный релиз — при пуше тега v*.*.*
+      - name: Publish versioned release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${GITHUB_REF_NAME}
+          gh release create "$VERSION" public_html.zip \
+            --title "$VERSION · $(date +'%d.%m.%Y')" \
+            --notes "Сборка сайта версии \`$VERSION\`. Скачайте \`public_html.zip\` и распакуйте в \`public_html\` на хостинге." \
+            --latest
+
+      # Плавающий latest — при каждом пуше в main
+      - name: Update rolling latest release
+        if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -129,4 +143,4 @@ jobs:
           gh release create latest public_html.zip \
             --title "Latest · $(date +'%d.%m.%Y %H:%M')" \
             --notes "Актуальная сборка сайта. Скачайте \`public_html.zip\` и распакуйте в папку \`public_html\` на хостинге." \
-            --latest
+            --prerelease
