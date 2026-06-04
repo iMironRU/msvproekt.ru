@@ -38,7 +38,7 @@ jobs:
           path: dist/
           retention-days: 1
 
-  # ── 2. Deploy via rsync over SSH ──────────────────────────────────────────
+  # ── 2. Deploy via FTP ────────────────────────────────────────────────────
   deploy:
     name: Deploy to hosting
     needs: build
@@ -51,23 +51,19 @@ jobs:
           name: dist
           path: dist/
 
-      - name: Deploy via rsync
+      - name: Deploy via FTP
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
-          SSH_PATH: ${{ secrets.SSH_PATH }}
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.FTP_PASS }}
         run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p "$SSH_PORT" "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          rsync -avz --delete \
-            -e "ssh -i ~/.ssh/id_rsa -p $SSH_PORT" \
-            dist/ \
-            "$SSH_USER@$SSH_HOST:$SSH_PATH/"
-          rm -f ~/.ssh/id_rsa
+          lftp ftp://$FTP_USER:$FTP_PASS@$FTP_HOST << 'SCRIPT'
+          set ftp:ssl-allow no
+          set net:timeout 60
+          set net:max-retries 3
+          mirror --reverse --delete --parallel=4 dist/ /
+          bye
+          SCRIPT
 
   # ── 3. GitHub Release with ZIP (only on version tags) ────────────────────
   release:

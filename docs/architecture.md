@@ -82,29 +82,17 @@ npm run build    # → dist/
 npm run preview  # → dist/ + локальный сервер
 ```
 
-## Настройка деплоя (SSH-секреты)
+## Настройка деплоя (FTP-секреты)
 
 В репозитории: **Settings → Secrets and variables → Actions**
 
-| Secret | Описание | Пример |
-|--------|---------|--------|
-| `SSH_HOST` | IP или домен сервера | `185.xxx.xxx.xxx` |
-| `SSH_USER` | SSH-пользователь | `msvproekt` |
-| `SSH_PRIVATE_KEY` | Приватный ключ (RSA/ED25519) | `-----BEGIN ...` |
-| `SSH_PORT` | SSH-порт (если не 22) | `22` |
-| `SSH_PATH` | Путь на сервере | `/home/msvproekt/web/msvproekt.ru/public_html` |
+| Secret | Описание |
+|--------|---------|
+| `FTP_HOST` | IP или домен сервера |
+| `FTP_USER` | FTP-пользователь |
+| `FTP_PASS` | FTP-пароль |
 
-### Генерация SSH-ключа для деплоя
-
-```bash
-ssh-keygen -t ed25519 -C "github-deploy" -f ~/.ssh/msvproekt_deploy -N ""
-
-# Публичный ключ → добавить на сервер в ~/.ssh/authorized_keys
-cat ~/.ssh/msvproekt_deploy.pub
-
-# Приватный ключ → добавить как SSH_PRIVATE_KEY в GitHub Secrets
-cat ~/.ssh/msvproekt_deploy
-```
+Деплой выполняется через `lftp mirror` — заливаются только изменённые файлы, удалённые локально файлы удаляются и на сервере.
 
 ## Ручной деплой
 
